@@ -1,0 +1,8 @@
+*.o
+*.opensdf
+*.sdf
+*.tlog
+*.obj
+
+7/Debug/
+7/ipch/
