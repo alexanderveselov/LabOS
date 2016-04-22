@@ -29,21 +29,21 @@ void closeFifo(int readfd, int writefd)
 void client(int readfd, int writefd)
 {
 	ssize_t n;
-	CustomData data;
+	char buffer[LINE_LEN];
 
 	printf("(Client) Enter filename:\n");
-	fgets(data.msg, MSG_MAX, stdin);
-	data.msg[strlen(data.msg)-1] = 0;
-	data.msg_len = strlen(data.msg);
+	fgets(buffer, LINE_LEN, stdin);
+	buffer[strlen(buffer)-1] = 0;
+	printf("(Client) Send message '%s' to the server\n", buffer);
+	write(writefd, buffer, strlen(buffer));
 
-	printf("(Client) Send data <Msg: '%s', Len: %d>\n", data.msg, data.msg_len);
-	write(writefd, &data, sizeof(long) + data.msg_len);
-
-	if ((n = read(readfd, &data, sizeof(long) + MSG_MAX)) > 0)
+	printf("(Client) Message from the server: '");
+	while ((n = read(readfd, buffer, LINE_LEN)) > 0)
 	{
-		data.msg[data.msg_len] = 0;
-		printf("(Client) Data from server <Msg: '%s', Len: %d>\n", data.msg, data.msg_len);
+		buffer[n] = 0;
+		printf("%s", buffer);
 	}
+	printf("'\n");
 
 }
 

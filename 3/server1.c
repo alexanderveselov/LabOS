@@ -52,29 +52,28 @@ void closeFifo(int readfd, int writefd)
 void server(int readfd, int writefd)
 {
 	int fd;
-	CustomData data;
+	ssize_t n;
+	char buffer[LINE_LEN];
 
-	read(readfd, &data, sizeof(long) + MSG_MAX);
-	data.msg[data.msg_len] = 0;
-	printf("(Server) Received data <Msg: '%s', Len: %d>\n", data.msg, data.msg_len);
-	
-	fd = open(data.msg, O_RDONLY);
+	n = read(readfd, buffer, LINE_LEN);
+	buffer[n] = 0; 
+	printf("(Server) Trying to open file '%s'...\n", buffer);
+	fd = open(buffer, O_RDONLY);
 	if (fd < 0)
 	{
-		strcpy(data.msg, "Failed to open file!");
-		data.msg_len = strlen(data.msg);
-		data.msg[data.msg_len] = 0;
-		write(writefd, &data, sizeof(long) + data.msg_len);
+		const char* errorMsg = "Failed to open file!";
+		write(writefd, errorMsg, strlen(errorMsg));
 	}
 	else
 	{
-		if ((data.msg_len = read(fd, data.msg, MSG_MAX)) > 0)
+		while ((n = read(fd, buffer, LINE_LEN)) > 0)
 		{
-			data.msg[data.msg_len] = 0;
-			write(writefd, &data, sizeof(long) + data.msg_len);
+			buffer[n] = 0;
+			write(writefd, buffer, n);
 		}
 		close(fd);
 	}
+
 }
 
 int main()
